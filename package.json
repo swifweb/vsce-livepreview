@@ -4,7 +4,7 @@
   "displayName": "webber",
   "description": "Live preview for SwifWeb apps",
   "license": "SEE LICENSE IN LICENCE",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.54.0"
   },

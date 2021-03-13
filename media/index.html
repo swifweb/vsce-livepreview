@@ -106,8 +106,15 @@
             switch (event.data.type) {
             case 'previews.notfound':
                 buildIsInProgress = false;
+                document.querySelector('.centerContent').style.display = 'block';
                 document.querySelector('.centerContent .addPreview').style.display = 'block';
                 document.querySelector('.centerContent .chooseFile').style.display = 'none';
+                document.querySelector('.previewsContainer').style.display = 'none';
+                document.querySelector('.previewsContainer').innerHTML = '';
+                if (currentDocumentPath.length > 0) {
+                    if (!previewsData[currentDocumentPath]) return;
+                    previewsData[currentDocumentPath].previews = [];
+                }
                 changeStatus(null);
                 break;
             case 'document.switch':
@@ -152,8 +159,9 @@
                 break;
             }
         });
+        const vscode = acquireVsCodeApi();
         function addPreview() {
-            acquireVsCodeApi().postMessage({ command: 'addPreview' })
+            vscode.postMessage({ command: 'addPreview' })
         }
         </script>
     </head>
