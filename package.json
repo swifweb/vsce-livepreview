@@ -8,6 +8,10 @@
   "engines": {
     "vscode": "^1.54.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swifweb/vsce-livepreview.git"
+  },
   "categories": [
     "Visualization"
   ],
