@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="__LF__/style.css">
+        <style>
+        body.vscode-light .backLogo {
+            background-image: url("__LF__/webber-light.png");
+        }
+        body.vscode-dark .backLogo {
+            background-image: url("__LF__/webber-dark.png");
+        }
+        body.vscode-high-contrast .backLogo {
+            background-image: url("__LF__/webber-dark.png");
+        }
+        </style>
+        <script>
+        var alreadyBuiltOnce = false;
+        var buildIsInProgress = false;
+        var previewsData = {};
+        var currentDocumentPath = '';
+        function addPreviewsFrom(docPath, previews, fromScratch) {
+            let previewsContainer = document.querySelector('.previewsContainer')
+            var allExistingPreviewNames = [];
+            document.querySelectorAll(".previewsContainer .item").forEach(node => {
+                allExistingPreviewNames.push(node.getAttribute('name'));
+            });
+            for (let i = 0; i < previews.length; i++) {
+                const previewData = previews[i];
+                if (!fromScratch && allExistingPreviewNames.some(e => e === previewData.class)) {
+                    // update existing preview
+                    let container = document.querySelector(".previewsContainer .item[name='" + previewData.class + "']")
+                    container.style.width = previewData.width > 0 ? previewData.width + 'px' : '200px';
+                    let title = document.querySelector(".previewsContainer .item[name='" + previewData.class + "'] p")
+                    title.innerText = previewData.title.length > 0 ? previewData.title : previewData.class;
+                    let code = document.querySelector(".previewsContainer .item[name='" + previewData.class + "'] .code")
+                    let newCode = document.createElement('iframe');
+                    newCode.classList.add('code');
+                    newCode.style.width = previewData.width > 0 ? previewData.width + 'px' : '200px';
+                    newCode.style.height = previewData.height > 0 ? previewData.height + 'px' : '200px';
+                    newCode.addEventListener("load", function() {
+                        code.remove();
+                        newCode.style.display = 'block';
+                    });
+                    newCode.src = "data:text/html;charset=utf-8," + escape(atob(previewData.html));
+                    newCode.style.display = 'none';
+                    container.appendChild(newCode);
+                } else {
+                    let container = document.createElement('div');
+                    container.classList.add('item');
+                    container.setAttribute('name', previewData.class);
+                    let title = document.createElement('p');
+                    title.innerText = previewData.title.length > 0 ? previewData.title : previewData.class;
+                    container.appendChild(title);
+                    let code = document.createElement('iframe');
+                    code.classList.add('code');
+                    code.style.width = previewData.width > 0 ? previewData.width + 'px' : '200px';
+                    code.style.height = previewData.height > 0 ? previewData.height + 'px' : '200px';
+                    code.addEventListener("load", function() {
+                        code.style.display = 'block';
+                    });
+                    code.src = "data:text/html;charset=utf-8," + escape(atob(previewData.html));
+                    code.style.display = 'none';
+                    container.appendChild(code);
+                    // append new preview 
+                    if (i > 0) {
+                        let prevNode = document.querySelector(".previewsContainer .item[name='" + previews[i - 1].class + "']")
+                        prevNode.parentNode.insertBefore(container, prevNode.nextSibling);
+                    } else {
+                        previewsContainer.appendChild(container);
+                    }
+                }
+                allExistingPreviewNames = allExistingPreviewNames.filter(e => e !== previewData.class);
+            };
+            allExistingPreviewNames.forEach(name => {
+                document.querySelector(".previewsContainer .item[name='" + name + "']").remove();
+            });
+        }
+        function changeStatus(status) {
+            switch (status) {
+            case 'building':
+                document.querySelector(".status").style.display = 'block';
+                document.querySelector(".status .indicator").classList.remove('success');
+                document.querySelector(".status .indicator").classList.remove('fail');
+                document.querySelector(".status .indicator").classList.add('building');
+                break;
+            case 'success':
+                document.querySelector(".status").style.display = 'block';
+                document.querySelector(".status .indicator").classList.remove('building');
+                document.querySelector(".status .indicator").classList.remove('fail');
+                document.querySelector(".status .indicator").classList.add('success');
+                break;
+            case 'fail':
+                document.querySelector(".status").style.display = 'block';
+                document.querySelector(".status .indicator").classList.remove('building');
+                document.querySelector(".status .indicator").classList.remove('success');
+                document.querySelector(".status .indicator").classList.add('fail');
+                break;
+            default:
+                document.querySelector(".status").style.display = 'none';
+            }
+        }
+        window.addEventListener('message', event => {
+            let payload = event.data.data;
+            switch (event.data.type) {
+            case 'previews.notfound':
+                buildIsInProgress = false;
+                document.querySelector('.centerContent .addPreview').style.display = 'block';
+                document.querySelector('.centerContent .chooseFile').style.display = 'none';
+                changeStatus(null);
+                break;
+            case 'document.switch':
+                buildIsInProgress = false;
+                document.querySelector('.centerContent .addPreview').style.display = 'none';
+                document.querySelector('.centerContent .chooseFile').style.display = payload.isSwift ? 'none' : 'block';
+                changeStatus(null);
+                if (currentDocumentPath == payload.path) return;
+                currentDocumentPath = payload.path;
+                if (payload.path in previewsData) {
+                    document.querySelector('.centerContent').style.display = 'none';
+                    document.querySelector('.previewsContainer').style.display = 'block';
+                    document.querySelector('.previewsContainer').innerHTML = '';
+                    addPreviewsFrom(payload.path, previewsData[payload.path].previews, true);
+                } else {
+                    document.querySelector('.previewsContainer').style.display = 'none';
+                    document.querySelector('.previewsContainer').innerHTML = '';
+                    document.querySelector('.centerContent').style.display = 'block';
+                }
+                break;
+            case 'build.start':
+                buildIsInProgress = true;
+                setTimeout(() => {
+                    // show loader if still building after 3s
+                    if (buildIsInProgress == true) {
+                        changeStatus('building');
+                    }
+                }, 3000);
+                break;
+            case 'build.fail':
+                buildIsInProgress = false;
+                changeStatus('fail');
+                // grab errors
+                break;
+            case 'build.success':
+                changeStatus('success');
+                buildIsInProgress = false;
+                previewsData[payload.path] = payload;
+                document.querySelector('.centerContent').style.display = 'none';
+                document.querySelector('.previewsContainer').style.display = 'block';
+                addPreviewsFrom(payload.path, payload.previews);
+                break;
+            }
+        });
+        function addPreview() {
+            acquireVsCodeApi().postMessage({ command: 'addPreview' })
+        }
+        </script>
+    </head>
+    <body>
+        <div class="centerContent">
+            <div class="backLogo"></div>
+            <div class="chooseFile">
+                Go to swift file to activate live preview
+            </div>
+            <div class="addPreview">
+                <p>No previews in this file</p>
+                <button onclick="addPreview()">Add preview code</button>
+            </div>
+        </div>
+        <div class="status">
+            <div class="indicator"></div>
+        </div>
+        <div class="previewsContainer"></div>
+    </body>
+</html>

@@ -1,0 +1,140 @@
+*{
+    font-family:system, -apple-system, 'San Francisco', Roboto, 'Segoe UI', 'Helvetica Neue', 'Lucida Grande', sans-serif;
+}
+.centerContent {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0px;
+    width: 100%;
+    transform: translateY(-50%);
+}
+.centerContent .chooseFile {
+    display: block;
+    color: #878787;
+    font-size: 14px;
+    text-align: center;
+    position: fixed;
+    top: 101%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.centerContent .addPreview {
+    display: none;
+    position: fixed;
+    top: 101%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.centerContent .addPreview p {
+    display: block;
+    color: #878787;
+    font-size: 14px;
+    text-align: center;
+}
+.centerContent .addPreview button {
+    border-radius: 6px;
+    border: 0px!important;
+    display: block;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 6px 24px;
+    text-decoration: none;
+    margin: 0 auto;
+    margin-top: 8px;
+    outline: 0!important;
+}
+body.vscode-light .centerContent .addPreview button {
+    box-shadow: inset 0px 1px 8px 0px #eaeaea;
+    background: linear-gradient(to bottom, #e6e6e6 5%, #d0d0d0 100%);
+    background-color: #ffffff;
+    color: #3e3e3e;
+    text-shadow: 0px 1px 2px #f3f3f3;
+}
+body.vscode-dark .centerContent .addPreview button {
+    box-shadow: inset 0px 1px 8px 0px #292929;
+    background: linear-gradient(to bottom, #313131 5%, #292929 100%);
+    background-color: #000000;
+    color: #c3c3c3;
+    text-shadow: 0px 1px 2px #444444;
+}
+body.vscode-high-contrast .centerContent .addPreview button {
+    box-shadow: inset 0px 1px 8px 0px #292929;
+    background: linear-gradient(to bottom, #313131 5%, #292929 100%);
+    background-color: #000000;
+    color: #c3c3c3;
+    text-shadow: 0px 1px 2px #444444;
+}
+.centerContent .addPreview button:hover {
+	background:linear-gradient(to bottom, #242424 5%, #1a1a1a 100%);
+	background-color:#000000;
+}
+.centerContent .addPreview button:active {
+	position:relative;
+	top:1px;
+}
+
+.backLogo {
+    display: block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 60vw;
+    height: 60vw;
+    margin: 0 auto;
+    padding: 0;
+    
+}
+.previewsContainer {
+    display: flex!important;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+.previewsContainer .item {
+    flex: 0 0 auto;
+    margin: 11px;
+}
+.previewsContainer .item p {
+    font-size: 16px;
+    text-align: center;
+}
+body.vscode-light .previewsContainer .item p {
+    color: black;
+}
+body.vscode-dark .previewsContainer .item p {
+    color: white;
+}
+body.vscode-high-contrast .previewsContainer .item p {
+    color: rgb(100, 255, 38);
+}
+.previewsContainer .item .code {
+    display: block;
+    border-radius: 4px;
+    border-width: 0px;
+    background-color: white;
+    box-shadow: black 2px 2px 20px 0px
+}
+.status {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    display: none;
+}
+.status .indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.status .indicator.building {
+    background-color: rgb(216, 213, 16);
+}
+.status .indicator.fail {
+    background-color: rgb(146, 11, 11);
+}
+.status .indicator.success {
+    background-color: rgb(27, 209, 10);
+}
