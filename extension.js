@@ -53,17 +53,17 @@ function activate(context) {
 		var builderProcess = null;
 
 		function rebuild(doc, pwn) {
-			console.log('rebuild called');
+			// console.log('rebuild called');
 			if (builderProcess != null) {
-				console.error('rebuild killed previous build');
+				// console.warn('rebuild killed previous build');
 				builderProcess.kill('SIGKILL');
 			}
 
 			let document = doc ?? vscode.window.activeTextEditor.document;
-			console.log('pwn', pwn);
+			// console.log('pwn', pwn);
 			let previewNames = pwn ?? [];
-			console.log('previewNames', previewNames);
-			console.log('rebuild looking for preview, lines: ' + document.lineCount);
+			// console.log('previewNames', previewNames);
+			// console.log('rebuild looking for preview, lines: ' + document.lineCount);
 			for (let lineIndex = 0; lineIndex < document.lineCount; lineIndex++) {
 				const line = document.lineAt(lineIndex);
 				if (line.isEmptyOrWhitespace) continue;
@@ -74,24 +74,18 @@ function activate(context) {
 				if (!(p1 < p2 && p2 < p3)) continue;
 				previewNames.push(line.text.split('_Preview')[0].split('class ')[1]);
 			}
-			console.log('rebuild step 1', previewNames.length);
 			if (previewNames.length == 0) {
 				currentPanel.webview.postMessage({ type: 'previews.notfound' });
 				return;
 			}
-			console.log('rebuild step 2');
 			document.save();
-			console.log('rebuild step 3');
 			let filePath = document.fileName;
 			if (!filePath.endsWith('.swift')) return;
-			console.log('rebuild step 4');
 			if (!filePath.includes('/Sources/')) return;
-			console.log('rebuild step 5');
 			let cwd = filePath.split('/Sources/')[0];
 			let moduleName = filePath.split('/Sources/')[1].split('/')[0]
 			let previews = previewNames.map(name => moduleName + '/' + name ).join(',')
 			const command = `swift run -Xswiftc -DWEBPREVIEW ` + moduleName + ` --previews ` + previews + ` --build-path ./.build/.live`;
-			console.log('rebuild command: ' + command);
 			builderProcess = require('child_process')
 				.spawn(
 					'swift', 
@@ -107,33 +101,29 @@ function activate(context) {
 			var errors = '';
 			var resultJSON = '';
 			currentPanel.webview.postMessage({ type: 'build.start' });
-			console.log('rebuild step 6');
 			builderProcess.stdout.on('data', function(msg) {
 				resultJSON += msg.toString();
-				console.log('out line: ' + msg.toString());
+				// console.log('out line: ' + msg.toString());
 			});
 			builderProcess.stderr.on('data', function(msg) {
 				errors += msg.toString();
-				console.log('err line: ' + msg.toString());
 			});
 			builderProcess.on('error', (error) => {
 				currentPanel.webview.postMessage({ type: 'build.fail' });
-				console.error(`error: ${error.message}`);
+				// console.error(`error: ${error.message}`);
 			});
 			builderProcess.on('close', (code) => {
-				console.log(`builderProcess exited with code ${code}`);
 				if (code == 0) {
 					let previewData = JSON.parse(resultJSON);
-					console.dir(previewData);
+					// console.dir(previewData);
 					previewData.path = document.fileName;
 					currentPanel.webview.postMessage({ type: 'build.success', data: previewData });
 				} else if (code == 1 && errors.includes('unable to attach DB')) {
-					console.warn('rebuild need restart');
+					// console.warn('rebuild need restart');
 					rebuild();
 				} else {
 					if (!code) return;
 					currentPanel.webview.postMessage({ type: 'build.fail' });
-					console.log('rebuild failed');
 				}
 			});
 		}
@@ -147,7 +137,7 @@ function activate(context) {
 		vscode.window.onDidChangeActiveTextEditor(function (editor) {
 			if (editor) lastATE = editor;
 			if (builderProcess != null) {
-				console.error('rebuild killed previous build');
+				// console.warn('rebuild killed previous build');
 				builderProcess.kill('SIGKILL');
 			}
 			let isSwift = editor.document.fileName.endsWith('.swift');
@@ -182,10 +172,7 @@ class MyNew_Preview: WebPreview {
 }
 `
 						, function (err) {
-							console.log('appendFile handler', err);
 							if (err) throw err;
-							console.log('appendFile handler2');
-							console.log('will call rebuild');
 							rebuild(lastATE.document, ['MyNew']);
 						});
 					}
